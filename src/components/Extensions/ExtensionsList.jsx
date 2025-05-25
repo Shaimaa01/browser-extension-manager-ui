@@ -6,12 +6,13 @@ import { ExtensionsHeader } from "./ExtensionsHeader";
 import { FilterControls } from "./FilterControls";
 import { ExtensionsGrid } from "./ExtensionsGrid";
 
+const FILTER_OPTIONS = {
+  ALL: "All",
+  ACTIVE: "Active",
+  INACTIVE: "Inactive",
+};
+
 export function ExtensionsList() {
-  const FILTER_OPTIONS = {
-    ALL: "All",
-    ACTIVE: "Active",
-    INACTIVE: "Inactive",
-  };
   const [extensions, setExtensions] = useState([]);
   const [activeFilter, setActiveFilter] = useState(FILTER_OPTIONS.ALL);
   const [isLoading, setIsLoading] = useState(true);
@@ -26,12 +27,7 @@ export function ExtensionsList() {
       default:
         return extensions;
     }
-  }, [
-    activeFilter,
-    FILTER_OPTIONS.ACTIVE,
-    FILTER_OPTIONS.INACTIVE,
-    extensions,
-  ]);
+  }, [activeFilter, extensions]);
 
   const loadExtensions = useCallback(async () => {
     try {
@@ -82,7 +78,7 @@ export function ExtensionsList() {
   }, []);
 
   const removeExtension = useCallback((name) => {
-   setExtensions((prev) => {
+    setExtensions((prev) => {
       const newExtensions = prev.filter((ext) => ext.name !== name);
       localStorage.setItem("extensions", JSON.stringify(newExtensions));
       return newExtensions;
@@ -104,16 +100,15 @@ export function ExtensionsList() {
   return (
     <main className="flex flex-col ">
       <section className="flex flex-col  items-center gap-[32px]">
-      <div className=" w-full flex flex-col md:flex-row md:justify-between justify-center items-center  gap-[24px]">
-        <ExtensionsHeader />
+        <div className=" w-full flex flex-col md:flex-row md:justify-between justify-center items-center  gap-[24px]">
+          <ExtensionsHeader />
 
-        <FilterControls
-          activeFilter={activeFilter}
-          onFilterChange={handleFilterChange}
-          FILTER_OPTIONS={FILTER_OPTIONS}
-        />
-      </div>
-      
+          <FilterControls
+            activeFilter={activeFilter}
+            onFilterChange={handleFilterChange}
+            FILTER_OPTIONS={FILTER_OPTIONS}
+          />
+        </div>
 
         <div
           id="extensions-list"
