@@ -2,20 +2,86 @@ import { useState, useEffect } from "react";
 import { fetchExtensions } from "../utils/fetchExtensions";
 
 export function ExtensionsList() {
-  const [isActive, setIsActive] = useState(true);
   const [extensions, setExtensions] = useState([]);
+ const [displayedExtensions, setDisplayedExtensions] = useState([]);
+  const [activeFilter, setActiveFilter] = useState("All");
 
-  function toggleExtension() {
-    setIsActive(!isActive);
-  }
+  const loadExtensions = async () => {
+    try {
+      const fetchedData = await fetchExtensions();
+      const storedExtensions = JSON.parse(
+        localStorage.getItem("extensions") || "[]"
+      );
+      const lastFetched = JSON.parse(
+        localStorage.getItem("lastFetched") || "[]"
+      );
+
+      let updatedExtensions =
+        storedExtensions.length > 0 ? storedExtensions : fetchedData;
+
+      const newExtensions = fetchedData.filter(
+        (f) => !lastFetched.some((l) => l.name === f.name)
+      );
+
+      if (newExtensions.length > 0) {
+        updatedExtensions = [...updatedExtensions, ...newExtensions];
+      }
+
+      setExtensions(updatedExtensions);
+      setDisplayedExtensions(updatedExtensions);
+      localStorage.setItem("extensions", JSON.stringify(updatedExtensions));
+      localStorage.setItem("lastFetched", JSON.stringify(fetchedData));
+    } catch (error) {
+      console.error("Failed to load extensions:", error);
+    }
+  };
 
   useEffect(() => {
-    fetchExtensions().then((data) => {
-      setExtensions(data);
-    });
+    loadExtensions();
   }, []);
 
-  console.log(extensions);
+  useEffect(() => {
+    if (activeFilter === "All") {
+      setDisplayedExtensions(extensions);
+    } else if (activeFilter === "Active") {
+      setDisplayedExtensions(extensions.filter((item) => item.isActive));
+    } else if (activeFilter === "Inactive") {
+      setDisplayedExtensions(extensions.filter((item) => !item.isActive));
+    }
+  }, [extensions, activeFilter]);
+
+  // Toggle extension
+  function toggleExtension(name) {
+    setExtensions((prev) => {
+      const newExtensions = prev.map((ext) =>
+        ext.name === name ? { ...ext, isActive: !ext.isActive } : ext
+      );
+      localStorage.setItem("extensions", JSON.stringify(newExtensions));
+      return newExtensions;
+    });
+  }
+
+  // Remove extension
+  function removeExtension(name) {
+    setExtensions((prev) => {
+      const newExtensions = prev.filter((ext) => ext.name !== name);
+      localStorage.setItem("extensions", JSON.stringify(newExtensions));
+      return newExtensions;
+    });
+  }
+
+  // Filter buttons
+  function allExtensions() {
+    setActiveFilter("All");
+  }
+
+  function activeExtensions() {
+    setActiveFilter("Active");
+  }
+
+  function inactiveExtensions() {
+    setActiveFilter("Inactive");
+  }
 
   return (
     <main className="flex flex-col ">
@@ -25,25 +91,47 @@ export function ExtensionsList() {
         </h1>
         <div className="flex gap-[12px] h-[46px]">
           <button
-            className={`bg-Red-400 rounded-full w-[64px]   text-Neutral-900 font-medium text-[20px] tracking-[-0.3px] leading-[140%] cursor-pointer`}
+            onClick={allExtensions}
+            className={`rounded-full w-[64px] font-medium text-[20px] tracking-[-0.3px] leading-[140%] cursor-pointer ${
+              activeFilter === "All"
+                ? "bg-Red-400 text-Neutral-900"
+                : "bg-Neutral-700 border border-Neutral-600 text-Neutral-0"
+            }`}
           >
             All
           </button>
-          <button className="bg-Neutral-700 border border-Neutral-600   px-[20px] pt-[8px] pb-[10px] rounded-full text-Neutral-0  text-[20px] tracking-[-0.3px] leading-[140%] cursor-pointer">
+          <button
+            className={`px-[20px] pt-[8px] pb-[10px] rounded-full font-medium text-[20px] tracking-[-0.3px] leading-[140%] cursor-pointer ${
+              activeFilter === "Active"
+                ? "bg-Red-400 text-Neutral-900"
+                : "bg-Neutral-700 border border-Neutral-600 text-Neutral-0"
+            }`}
+            onClick={activeExtensions}
+          >
             Active
           </button>
-          <button className="bg-Neutral-700 border border-Neutral-600   px-[20px] pt-[8px] pb-[10px] rounded-full text-Neutral-0  text-[20px] tracking-[-0.3px] leading-[140%]  cursor-pointer">
+          <button
+            onClick={inactiveExtensions}
+            className={`px-[20px] pt-[8px] pb-[10px] rounded-full font-medium text-[20px] tracking-[-0.3px] leading-[140%] cursor-pointer ${
+              activeFilter === "Inactive"
+                ? "bg-Red-400 text-Neutral-900"
+                : "bg-Neutral-700 border border-Neutral-600 text-Neutral-0"
+            }`}
+          >
             Inactive
           </button>
         </div>
         {/* card */}
 
-        {extensions?.map((extension) => (
-          <div className="w-[343px] h-[200px] rounded-[20px] border flex flex-col  justify-between p-[20px] bg-Neutral-800 border-Neutral-600">
+        {displayedExtensions?.map((extension, index) => (
+          <div
+            key={index}
+            className="w-[343px] h-[200px] rounded-[20px] border flex flex-col  justify-between p-[20px] bg-Neutral-800 border-Neutral-600"
+          >
             <div className="flex gap-[16px]">
               <img
                 src={extension.logo}
-                alt="img"
+                alt={extension.name}
                 className="w-[60px] h-[60px] rounded-[10px]"
               ></img>
               <div className="flex flex-col gap-[8px]">
@@ -57,12 +145,15 @@ export function ExtensionsList() {
             </div>
 
             <div className="flex justify-between items-center">
-              <button className="w-[91px] h-[38px] rounded-full border py-[8px] px-[16px] border-Neutral-600 text-Neutral-0 text-[16px] leading-[140%] tracking-[-0.5px] flex justify-center items-center">
+              <button
+                onClick={() => removeExtension(extension.name)}
+                className="w-[91px] h-[38px] rounded-full border py-[8px] px-[16px] border-Neutral-600 text-Neutral-0 text-[16px] leading-[140%] tracking-[-0.5px] flex justify-center items-center cursor-pointer"
+              >
                 Remove
               </button>
 
               <button
-                onClick={toggleExtension}
+                onClick={() => toggleExtension(extension.name)}
                 className={`w-[36px] h-[20px] rounded-full p-[2px]  relative ${
                   extension.isActive ? "bg-Red-400" : "bg-Neutral-600"
                 }`}
