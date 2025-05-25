@@ -27,7 +27,7 @@ export function ThemeProvider({ children }) {
 
   return (
     <ThemeContext.Provider value={{ theme, setTheme, themeIcon }}>
-      <div className="min-h-screen flex flex-col gap-[40px] transition-all duration-300 bg-[linear-gradient(180deg,_#EBF2FC_0%,_#EEF8F9_100%)]  dark:bg-[linear-gradient(180deg,_#040918_0%,_#091540_100%)] pt-[24px] pb-[64px] px-[16px]">
+      <div className="min-h-screen flex flex-col gap-[40px] lg:gap-[64px] transition-all duration-300 bg-[linear-gradient(180deg,_#EBF2FC_0%,_#EEF8F9_100%)]  dark:bg-[linear-gradient(180deg,_#040918_0%,_#091540_100%)] pt-[24px] lg:pt-[40px]   pb-[64px]  px-[16px] md:px-[32px] xl:px-[127px]">
         {children}
       </div>
     </ThemeContext.Provider>
