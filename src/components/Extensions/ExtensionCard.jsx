@@ -10,7 +10,7 @@ export function ExtensionCard({ extension, onToggle, onRemove}) {
   return (
     <div
       
-      className="w-[343px] md:w-[346px] xl:w-[382px] h-[200px] rounded-[20px] border flex flex-col  justify-between p-[20px] bg-Neutral-800 border-Neutral-600"
+      className="w-[343px] md:w-[346px] xl:w-[382px] h-[200px] rounded-[20px] border flex flex-col  justify-between p-[20px] bg-Neutral-0 dark:bg-Neutral-800 border-Neutral-200 dark:border-Neutral-600 shadow-[0_2px_2px_0_hsla(217,34%,82%,0.2),0_1px_5px_1px_hsla(217,34%,82%,0.22)] dark:shadow-none"
     >
       <div className="flex gap-[16px]">
         <ExtensionLogo src={extension.logo} alt={extension.name} />
