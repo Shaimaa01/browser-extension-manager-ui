@@ -5,6 +5,7 @@
         "description": "Quickly inspect page layouts and visualize element boundaries.",
         "isActive": true
     },
+    
     {
         "logo": "./assets/images/logo-style-spy.svg",
         "name": "StyleSpy",
