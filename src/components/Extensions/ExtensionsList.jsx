@@ -1,10 +1,10 @@
 import { useState, useEffect, useCallback, useMemo } from "react";
 import { fetchExtensions } from "../../utils/fetchExtensions";
-import { LoadingSpinner } from "./LoadingSpinner";
-import { ErrorDisplay } from "./ErrorDisplay";
-import { ExtensionsHeader } from "./ExtensionsHeader";
-import { FilterControls } from "./FilterControls";
-import { ExtensionsGrid } from "./ExtensionsGrid";
+import { LoadingSpinner } from "./extensionsComponents/LoadingSpinner";
+import { ErrorDisplay } from "./extensionsComponents/ErrorDisplay";
+import { ExtensionsHeader } from "./extensionsComponents/ExtensionsHeader";
+import { FilterControls } from "./extensionsComponents/FilterControls";
+import { ExtensionsGrid } from "./extensionsComponents/ExtensionsGrid";
 
 const FILTER_OPTIONS = {
   ALL: "All",
@@ -37,24 +37,13 @@ export function ExtensionsList() {
       const storedExtensions = JSON.parse(
         localStorage.getItem("extensions") || "[]"
       );
-      const lastFetched = JSON.parse(
-        localStorage.getItem("lastFetched") || "[]"
-      );
 
       let updatedExtensions =
         storedExtensions.length > 0 ? storedExtensions : fetchedData;
 
-      const newExtensions = fetchedData.filter(
-        (f) => !lastFetched.some((l) => l.name === f.name)
-      );
-
-      if (newExtensions.length > 0) {
-        updatedExtensions = [...updatedExtensions, ...newExtensions];
-      }
       setExtensions(updatedExtensions);
 
       localStorage.setItem("extensions", JSON.stringify(updatedExtensions));
-      localStorage.setItem("lastFetched", JSON.stringify(fetchedData));
     } catch (err) {
       setError("Failed to load extensions. Please try again.");
       console.error("Failed to load extensions:", err);
@@ -128,3 +117,4 @@ export function ExtensionsList() {
     </main>
   );
 }
+
